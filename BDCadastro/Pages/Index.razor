@@ -1,0 +1,72 @@
+﻿@page "/"
+
+
+@using BDCadastro.Model
+@using BDCadastro.Service
+@inject IPessoaService PessoaService
+@inject NavigationManager NavManager
+
+
+<h1>Lista de Pessoa</h1>
+
+<p>Essas são as listas de pessoas cadastradas.</p>
+
+@if (pessoas == null)
+{
+    <p><em>Carregando...</em></p>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Nome</th>
+                    <th>Email</th>
+                    <th>Genero</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var pessoa in pessoas)
+                {
+                    <tr>
+                        <td>@pessoa.Nome</td>
+                        <td>@pessoa.Email</td>
+                        <td>@pessoa.Genero</td>
+                        <td>
+                            <button type="submit" @onclick="@(()=> EditPessoa(pessoa.PessoaID))" class="btn btn-primary">Editar</button>
+                        </td>
+                        <td>
+                            <button type="submit" @onclick="@(()=> DeleteStudent(pessoa))" class="btn btn-primary">Delete</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+}
+
+@code {
+    private List<PessoaModel> pessoas;
+
+    protected override async Task OnInitializedAsync()
+    {
+        pessoas = await PessoaService.GetAllPessoa();
+    }
+
+    private void EditPessoa(int pessoaID)
+    {
+        NavManager.NavigateTo($"update_pessoa/{pessoaID}");
+    }
+
+    private async void DeleteStudent(PessoaModel pessoa)
+    {
+        var response = await PessoaService.DeletePessoa(pessoa);
+        if (response > 0)
+        {
+            await OnInitializedAsync();
+            this.StateHasChanged();
+        }
+    }
+}
